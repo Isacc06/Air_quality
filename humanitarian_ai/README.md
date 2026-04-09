@@ -24,6 +24,18 @@ Collecte (ONG, satellites, météo, santé, logistique)
     -> Tableau de bord décisionnel
 ```
 
+## Démarche cible (collecter -> unifier -> entraîner)
+
+Le but n'est pas seulement d'avoir un score heuristique: il faut **réunir les sources de données** puis **entraîner un modèle** adapté au contexte terrain.
+
+### Étapes minimales
+
+1. Collecter plusieurs sources (humanitaires, météo, géospatial, santé, opérations internes).
+2. Harmoniser les schémas de données (zone/date/features/target).
+3. Consolider en un dataset d'entraînement unique.
+4. Entraîner un modèle supervisé sur des priorités historiques validées par les équipes.
+5. Évaluer, auditer les biais, puis déployer en mode human-in-the-loop.
+
 ## Démarrage rapide
 
 ```bash
@@ -31,6 +43,16 @@ python humanitarian_ai/prioritization.py
 ```
 
 Le script affiche une priorisation simple des zones et une allocation heuristique des kits.
+
+### Entraîner un premier modèle sur données consolidées
+
+```bash
+python humanitarian_ai/train_humanitarian_model.py \
+  --data humanitarian_ai/examples/consolidated_training_sample.csv \
+  --out humanitarian_ai/model.json
+```
+
+Ce script produit un modèle entraîné (`model.json`) à partir d'un dataset consolidé.
 
 ## Variables de score (exemple)
 
@@ -85,6 +107,25 @@ Le score est configurable selon le contexte (conflit, inondation, épidémie, et
 - Journaux d'incidents sécurité et contraintes d'accès.
 
 > Bonnes pratiques: commencer avec 5 à 10 sources robustes, harmoniser les identifiants géographiques (adm0/adm1/adm2), et tracer la qualité/fraîcheur de chaque source avant entraînement.
+
+## Unification des sources (pré-traitement)
+
+Le module `data_unification.py` fournit les briques pour:
+
+- mapper des colonnes source -> schéma commun,
+- consolider des enregistrements multi-sources par `(zone, date)`,
+- écrire un CSV consolidé prêt pour l'entraînement.
+
+Schéma commun numérique actuellement prévu:
+
+- `affected_population`
+- `health_severity`
+- `access_difficulty`
+- `vulnerability`
+- `local_stock`
+- `rainfall_mm`
+- `food_insecurity_index`
+- `target_priority` (label supervisé)
 
 ## Plan de déploiement (90 jours)
 
